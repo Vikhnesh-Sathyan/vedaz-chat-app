@@ -1,23 +1,29 @@
 const Message = require("../models/Message");
 
+const onlineUsers = new Map();
+
 const initializeSocket = (io) => {
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`);
+
+    socket.on("user_online", (username) => {
+      onlineUsers.set(socket.id, username);
+
+      io.emit("online_users", Array.from(onlineUsers.values()));
+
+      console.log(`${username} is online`);
+    });
 
     socket.on("send_message", async (data) => {
       try {
         const { username, message } = data;
 
-        if (!username || !message) {
-          socket.emit("message_error", {
-            message: "Username and message are required",
-          });
-
+        if (!username || !message?.trim()) {
           return;
         }
 
         const newMessage = await Message.create({
-          username: username.trim(),
+          username,
           message: message.trim(),
         });
 
@@ -32,7 +38,17 @@ const initializeSocket = (io) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.id}`);
+      const username = onlineUsers.get(socket.id);
+
+      onlineUsers.delete(socket.id);
+
+      io.emit("online_users", Array.from(onlineUsers.values()));
+
+      console.log(
+        username
+          ? `${username} disconnected`
+          : `User disconnected: ${socket.id}`
+      );
     });
   });
 };
