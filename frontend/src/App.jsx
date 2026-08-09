@@ -20,8 +20,10 @@ function App() {
 
   const [loading, setLoading] = useState(false);
 
-  // Online users
   const [onlineUsers, setOnlineUsers] = useState([]);
+
+  // Typing indicator
+  const [typingUser, setTypingUser] = useState("");
 
   useEffect(() => {
     if (!username) {
@@ -32,10 +34,16 @@ function App() {
 
     setSocket(newSocket);
 
-    // Tell backend that this user is online
+    // ============================
+    // USER ONLINE
+    // ============================
+
     newSocket.emit("user_online", username);
 
-    // Load previous messages
+    // ============================
+    // LOAD OLD MESSAGES
+    // ============================
+
     const loadMessages = async () => {
       try {
         setLoading(true);
@@ -54,17 +62,26 @@ function App() {
 
     loadMessages();
 
-    // Socket connected
+    // ============================
+    // SOCKET CONNECTED
+    // ============================
+
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
     });
 
-    // Receive online users
+    // ============================
+    // ONLINE USERS
+    // ============================
+
     newSocket.on("online_users", (users) => {
       setOnlineUsers(users);
     });
 
-    // Receive new messages instantly
+    // ============================
+    // NEW MESSAGE
+    // ============================
+
     newSocket.on("new_message", (newMessage) => {
       setMessages((previousMessages) => [
         ...previousMessages,
@@ -72,21 +89,55 @@ function App() {
       ]);
     });
 
-    // Handle socket errors
+    // ============================
+    // USER TYPING
+    // ============================
+
+    newSocket.on("user_typing", (user) => {
+      if (user !== username) {
+        setTypingUser(user);
+      }
+    });
+
+    // ============================
+    // USER STOPPED TYPING
+    // ============================
+
+    newSocket.on("user_stop_typing", (user) => {
+      if (user !== username) {
+        setTypingUser("");
+      }
+    });
+
+    // ============================
+    // MESSAGE ERROR
+    // ============================
+
     newSocket.on("message_error", (error) => {
       console.error("Message error:", error.message);
     });
 
-    // Handle disconnect
+    // ============================
+    // DISCONNECT
+    // ============================
+
     newSocket.on("disconnect", () => {
       console.log("Socket disconnected");
     });
+
+    // ============================
+    // CLEANUP
+    // ============================
 
     return () => {
       newSocket.disconnect();
       setSocket(null);
     };
   }, [username]);
+
+  // ============================
+  // USERNAME SUBMIT
+  // ============================
 
   const handleUsernameSubmit = (event) => {
     event.preventDefault();
@@ -99,6 +150,10 @@ function App() {
 
     setUsername(trimmedUsername);
   };
+
+  // ============================
+  // SEND MESSAGE
+  // ============================
 
   const handleSendMessage = (message) => {
     if (!socket) {
@@ -118,12 +173,18 @@ function App() {
     });
   };
 
-  // Username screen
+  // ============================
+  // LOGIN SCREEN
+  // ============================
+
   if (!username) {
     return (
       <div className="login-container">
         <div className="username-card">
-          <div className="logo">V</div>
+
+          <div className="logo">
+            V
+          </div>
 
           <h1>Vedaz Chat</h1>
 
@@ -147,14 +208,19 @@ function App() {
               Join Chat
             </button>
           </form>
+
         </div>
       </div>
     );
   }
 
-  // Chat screen
+  // ============================
+  // CHAT SCREEN
+  // ============================
+
   return (
     <div className="app-container">
+
       <div className="chat-container">
 
         <ChatHeader
@@ -173,11 +239,24 @@ function App() {
           />
         )}
 
+        {/* TYPING INDICATOR */}
+
+        {typingUser && (
+          <div className="typing-indicator">
+            <span>{typingUser} is typing</span>
+          </div>
+        )}
+
+        {/* MESSAGE INPUT */}
+
         <MessageInput
           onSend={handleSendMessage}
+          socket={socket}
+          username={username}
         />
 
       </div>
+
     </div>
   );
 }
