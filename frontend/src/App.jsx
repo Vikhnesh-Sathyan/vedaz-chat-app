@@ -5,7 +5,7 @@ import ChatHeader from "./components/ChatHeader";
 import MessageList from "./components/MessageList";
 import MessageInput from "./components/MessageInput";
 
-import { getMessages, sendMessage } from "./services/chatService";
+import { getMessages } from "./services/chatService";
 
 import "./App.css";
 
@@ -47,6 +47,10 @@ function App() {
 
     loadMessages();
 
+    newSocket.on("connect", () => {
+      console.log("Connected to Socket.io:", newSocket.id);
+    });
+
     newSocket.on("new_message", (newMessage) => {
       setMessages((previousMessages) => [
         ...previousMessages,
@@ -55,11 +59,16 @@ function App() {
     });
 
     newSocket.on("message_error", (error) => {
-      console.error(error.message);
+      console.error("Socket message error:", error.message);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Disconnected from Socket.io");
     });
 
     return () => {
       newSocket.disconnect();
+      setSocket(null);
     };
   }, [username]);
 
@@ -75,23 +84,28 @@ function App() {
     setUsername(trimmedUsername);
   };
 
-  const handleSendMessage = async (message) => {
-    try {
-      await sendMessage(username, message);
-    } catch (error) {
-      console.error("Failed to send message:", error);
+  const handleSendMessage = (message) => {
+    if (!socket) {
+      console.error("Socket is not connected");
+      return;
     }
+
+    const trimmedMessage = message.trim();
+
+    if (!trimmedMessage) {
+      return;
+    }
+
+    socket.emit("send_message", {
+      username,
+      message: trimmedMessage,
+    });
   };
 
   if (!username) {
     return (
-      <div className="login-container">
-        <form
-          className="username-card"
-          onSubmit={handleUsernameSubmit}
-        >
-          <div className="logo">V</div>
-
+      <div className="username-page">
+        <form onSubmit={handleUsernameSubmit}>
           <h1>Vedaz Chat</h1>
 
           <p>Enter your username to join the conversation.</p>
@@ -99,25 +113,32 @@ function App() {
           <input
             type="text"
             value={usernameInput}
-            onChange={(event) => setUsernameInput(event.target.value)}
+            onChange={(event) =>
+              setUsernameInput(event.target.value)
+            }
             placeholder="Enter username"
             maxLength={30}
             autoFocus
           />
 
-          <button type="submit">Join Chat</button>
+          <button type="submit">
+            Join Chat
+          </button>
         </form>
       </div>
     );
   }
 
   return (
-    <div className="app-container">
+    <div className="chat-page">
       <div className="chat-container">
+
         <ChatHeader username={username} />
 
         {loading ? (
-          <div className="loading">Loading messages...</div>
+          <div className="loading">
+            Loading messages...
+          </div>
         ) : (
           <MessageList
             messages={messages}
@@ -126,6 +147,7 @@ function App() {
         )}
 
         <MessageInput onSend={handleSendMessage} />
+
       </div>
     </div>
   );

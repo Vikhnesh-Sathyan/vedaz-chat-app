@@ -9,12 +9,16 @@ const initializeSocket = (io) => {
         const { username, message } = data;
 
         if (!username || !message) {
+          socket.emit("message_error", {
+            message: "Username and message are required",
+          });
+
           return;
         }
 
         const newMessage = await Message.create({
-          username,
-          message,
+          username: username.trim(),
+          message: message.trim(),
         });
 
         io.emit("new_message", newMessage);

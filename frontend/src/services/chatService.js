@@ -8,7 +8,8 @@ export const getMessages = async () => {
   return response.data;
 };
 
-export const sendMessage = async (username, message) => {
+// REST API — required by the assessment
+export const sendMessageApi = async (username, message) => {
   const response = await axios.post(API_URL, {
     username,
     message,
