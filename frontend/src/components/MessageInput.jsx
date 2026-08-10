@@ -1,8 +1,12 @@
 import { useRef, useState } from "react";
+import axios from "axios";
 
 const MessageInput = ({ onSend, socket, username }) => {
   const [message, setMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
+  const fileInputRef = useRef(null);
   const typingTimeout = useRef(null);
 
   // ============================
@@ -18,50 +22,146 @@ const MessageInput = ({ onSend, socket, username }) => {
       return;
     }
 
-    // User is typing
     if (value.trim()) {
-      socket.emit("user_typing", username);
+      socket.emit("typing", username);
 
-      // Reset previous timer
       clearTimeout(typingTimeout.current);
 
-      // Stop typing after 1 second
       typingTimeout.current = setTimeout(() => {
-        socket.emit("user_stop_typing", username);
+        socket.emit("stop_typing", username);
       }, 1000);
     } else {
-      // Input is empty
-      socket.emit("user_stop_typing", username);
+      socket.emit("stop_typing", username);
 
       clearTimeout(typingTimeout.current);
     }
   };
 
   // ============================
+  // SELECT FILE
+  // ============================
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      alert("File size must be less than 10 MB.");
+
+      event.target.value = "";
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  // ============================
+  // REMOVE FILE
+  // ============================
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // ============================
+  // UPLOAD FILE
+  // ============================
+
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    const response = await axios.post(
+      "http://localhost:5000/api/messages/upload",
+      formData
+    );
+
+    return response.data.file;
+  };
+
+  // ============================
   // SEND MESSAGE
   // ============================
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const trimmedMessage = message.trim();
 
-    if (!trimmedMessage) {
+    if (!trimmedMessage && !selectedFile) {
       return;
     }
 
-    // Send message
-    onSend(trimmedMessage);
+    try {
+      setUploading(true);
 
-    // Clear input
-    setMessage("");
+      // ============================
+      // SEND FILE
+      // ============================
 
-    // Tell others we stopped typing
-    if (socket) {
-      socket.emit("user_stop_typing", username);
+      if (selectedFile) {
+        const uploadedFile = await uploadFile(
+          selectedFile
+        );
+
+        socket.emit("send_message", {
+          username,
+          message: trimmedMessage,
+          fileUrl: uploadedFile.fileUrl,
+          fileName: uploadedFile.fileName,
+          fileType: uploadedFile.fileType,
+          fileSize: uploadedFile.fileSize,
+        });
+      }
+
+      // ============================
+      // SEND TEXT ONLY
+      // ============================
+
+      else if (trimmedMessage) {
+        onSend(trimmedMessage);
+      }
+
+      // ============================
+      // CLEAR INPUT
+      // ============================
+
+      setMessage("");
+      setSelectedFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      if (socket) {
+        socket.emit(
+          "stop_typing",
+          username
+        );
+      }
+
+      clearTimeout(typingTimeout.current);
+
+    } catch (error) {
+      console.error(
+        "File upload error:",
+        error
+      );
+
+      alert("Failed to upload file.");
+    } finally {
+      setUploading(false);
     }
-
-    clearTimeout(typingTimeout.current);
   };
 
   return (
@@ -70,16 +170,82 @@ const MessageInput = ({ onSend, socket, username }) => {
       onSubmit={handleSubmit}
     >
 
+      {/* ============================
+          FILE PREVIEW
+      ============================ */}
+
+      {selectedFile && (
+        <div className="selected-file">
+          <span>
+            📎 {selectedFile.name}
+          </span>
+
+          <button
+            type="button"
+            onClick={handleRemoveFile}
+            className="remove-file-btn"
+            title="Remove file"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* ============================
+          FILE INPUT
+      ============================ */}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileChange}
+        className="file-input"
+        accept="image/*,.pdf,.doc,.docx,.txt,.zip"
+      />
+
+      {/* ============================
+          ATTACH BUTTON
+      ============================ */}
+
+      <button
+        type="button"
+        className="attach-button"
+        onClick={() =>
+          fileInputRef.current?.click()
+        }
+        title="Attach file"
+        disabled={uploading}
+      >
+        📎
+      </button>
+
+      {/* ============================
+          MESSAGE INPUT
+      ============================ */}
+
       <input
         type="text"
         value={message}
         onChange={handleChange}
-        placeholder="Type a message..."
+        placeholder={
+          uploading
+            ? "Uploading..."
+            : "Type a message..."
+        }
         autoComplete="off"
+        disabled={uploading}
       />
 
-      <button type="submit">
-        Send
+      {/* ============================
+          SEND BUTTON
+      ============================ */}
+
+      <button
+        type="submit"
+        className="send-button"
+        disabled={uploading}
+      >
+        {uploading ? "Sending..." : "Send"}
       </button>
 
     </form>

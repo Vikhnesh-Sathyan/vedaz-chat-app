@@ -11,6 +11,10 @@ const initializeSocket = (io) => {
     // ============================
 
     socket.on("user_online", (username) => {
+      if (!username) {
+        return;
+      }
+
       onlineUsers.set(socket.id, username);
 
       io.emit(
@@ -26,7 +30,14 @@ const initializeSocket = (io) => {
     // ============================
 
     socket.on("typing", (username) => {
-      socket.broadcast.emit("user_typing", username);
+      if (!username) {
+        return;
+      }
+
+      socket.broadcast.emit(
+        "user_typing",
+        username
+      );
     });
 
     // ============================
@@ -34,103 +45,256 @@ const initializeSocket = (io) => {
     // ============================
 
     socket.on("stop_typing", (username) => {
-      socket.broadcast.emit("user_stop_typing", username);
+      if (!username) {
+        return;
+      }
+
+      socket.broadcast.emit(
+        "user_stop_typing",
+        username
+      );
     });
 
     // ============================
     // SEND MESSAGE
     // ============================
 
-    socket.on("send_message", async (data) => {
-      try {
-        const { username, message } = data;
+    socket.on(
+      "send_message",
+      async (data) => {
+        try {
+          const {
+            username,
+            message,
+            fileUrl,
+            fileName,
+            fileType,
+            fileSize,
+          } = data || {};
 
-        if (!username || !message?.trim()) {
-          return;
+          // ============================
+          // VALIDATE USERNAME
+          // ============================
+
+          if (!username?.trim()) {
+            socket.emit("message_error", {
+              message:
+                "Username is required",
+            });
+
+            return;
+          }
+
+          const cleanUsername =
+            username.trim();
+
+          const cleanMessage =
+            message?.trim() || "";
+
+          // ============================
+          // CHECK MESSAGE CONTENT
+          // ============================
+
+          const hasText =
+            cleanMessage.length > 0;
+
+          const hasFile =
+            typeof fileUrl === "string" &&
+            fileUrl.trim().length > 0;
+
+          if (!hasText && !hasFile) {
+            socket.emit("message_error", {
+              message:
+                "Message or file is required",
+            });
+
+            return;
+          }
+
+          // ============================
+          // CREATE MESSAGE
+          // ============================
+
+          const newMessage =
+            await Message.create({
+              username: cleanUsername,
+
+              message: cleanMessage,
+
+              fileUrl: hasFile
+                ? fileUrl
+                : null,
+
+              fileName:
+                fileName || null,
+
+              fileType:
+                fileType || null,
+
+              fileSize:
+                typeof fileSize === "number"
+                  ? fileSize
+                  : null,
+            });
+
+          // ============================
+          // BROADCAST MESSAGE
+          // ============================
+
+          io.emit(
+            "new_message",
+            newMessage
+          );
+
+          console.log(
+            `Message sent by ${cleanUsername}`
+          );
+
+        } catch (error) {
+          console.error(
+            "Socket message error:",
+            error
+          );
+
+          socket.emit(
+            "message_error",
+            {
+              message:
+                "Failed to send message",
+            }
+          );
         }
-
-        const newMessage = await Message.create({
-          username,
-          message: message.trim(),
-        });
-
-        io.emit("new_message", newMessage);
-      } catch (error) {
-        console.error("Socket message error:", error);
-
-        socket.emit("message_error", {
-          message: "Failed to send message",
-        });
       }
-    });
+    );
 
-    
-// ============================
-// DELETE MESSAGE
-// ============================
+    // ============================
+    // DELETE MESSAGE
+    // ============================
 
-socket.on("delete_message", async (data) => {
-  try {
-    const { messageId, username } = data;
+    socket.on(
+      "delete_message",
+      async (data) => {
+        try {
+          const {
+            messageId,
+            username,
+          } = data || {};
 
-    if (!messageId || !username) {
-      return;
-    }
+          if (
+            !messageId ||
+            !username
+          ) {
+            return;
+          }
 
-    const message = await Message.findById(messageId);
+          // ============================
+          // FIND MESSAGE
+          // ============================
 
-    if (!message) {
-      socket.emit("message_error", {
-        message: "Message not found",
-      });
+          const message =
+            await Message.findById(
+              messageId
+            );
 
-      return;
-    }
+          if (!message) {
+            socket.emit(
+              "message_error",
+              {
+                message:
+                  "Message not found",
+              }
+            );
 
-    // Only the original sender can delete
-    if (message.username !== username) {
-      socket.emit("message_error", {
-        message: "You can only delete your own messages",
-      });
+            return;
+          }
 
-      return;
-    }
+          // ============================
+          // CHECK OWNER
+          // ============================
 
-    await Message.findByIdAndDelete(messageId);
+          if (
+            message.username !==
+            username
+          ) {
+            socket.emit(
+              "message_error",
+              {
+                message:
+                  "You can only delete your own messages",
+              }
+            );
 
-    // Notify every connected client
-    io.emit("message_deleted", messageId);
+            return;
+          }
 
-  } catch (error) {
-    console.error("Delete message error:", error);
+          // ============================
+          // DELETE
+          // ============================
 
-    socket.emit("message_error", {
-      message: "Failed to delete message",
-    });
-  }
-});
+          await Message.findByIdAndDelete(
+            messageId
+          );
 
+          // ============================
+          // NOTIFY CLIENTS
+          // ============================
+
+          io.emit(
+            "message_deleted",
+            messageId
+          );
+
+          console.log(
+            `Message deleted: ${messageId}`
+          );
+
+        } catch (error) {
+          console.error(
+            "Delete message error:",
+            error
+          );
+
+          socket.emit(
+            "message_error",
+            {
+              message:
+                "Failed to delete message",
+            }
+          );
+        }
+      }
+    );
 
     // ============================
     // DISCONNECT
     // ============================
 
-    socket.on("disconnect", () => {
-      const username = onlineUsers.get(socket.id);
+    socket.on(
+      "disconnect",
+      () => {
+        const username =
+          onlineUsers.get(
+            socket.id
+          );
 
-      onlineUsers.delete(socket.id);
+        onlineUsers.delete(
+          socket.id
+        );
 
-      io.emit(
-        "online_users",
-        Array.from(onlineUsers.values())
-      );
+        io.emit(
+          "online_users",
+          Array.from(
+            onlineUsers.values()
+          )
+        );
 
-      console.log(
-        username
-          ? `${username} disconnected`
-          : `User disconnected: ${socket.id}`
-      );
-    });
+        console.log(
+          username
+            ? `${username} disconnected`
+            : `User disconnected: ${socket.id}`
+        );
+      }
+    );
   });
 };
 

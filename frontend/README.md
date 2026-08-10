@@ -1,44 +1,58 @@
 # 💬 Vedaz Chat
 
-A real-time chat application built with **React, Node.js, Express, MongoDB, and Socket.io**. Vedaz Chat provides instant messaging with persistent message history, online/offline status, timestamps, and a responsive chat interface.
+A real-time chat application built with **React, Node.js, Express, MongoDB, Socket.IO, and Multer**.
+
+Vedaz Chat provides real-time messaging with persistent chat history, online user tracking, typing indicators, message search, dark mode, message deletion, and file/image sharing.
+
+---
 
 ## 🚀 Features
 
-* ✅ **React Frontend** — Modern and responsive user interface
-* ✅ **Node.js + Express Backend** — REST API and server-side logic
-* ✅ **MongoDB Persistence** — Messages are stored permanently
-* ✅ **REST API for Messages** — Send and retrieve chat messages
-* ✅ **Socket.io Real-Time Messaging** — Instant communication between users
-* ✅ **Instant Message Delivery** — Messages appear without refreshing the page
-* ✅ **Message Timestamps** — Displays when each message was sent
-* ✅ **Persistent Chat History** — Messages remain available after refreshing
-* ✅ **Connection Handling** — Handles Socket.io connection and disconnection events
-* ✅ **Username-Based Login** — Simple dummy login using a username
-* ✅ **Online/Offline Status** — Shows the current connection status of users
-* ✅ **Clean Component Structure** — Organized and maintainable React components
-* ✅ **Responsive UI** — Works across desktop and mobile screen sizes
+* 💬 **Real-Time Messaging** — Messages are delivered instantly using Socket.IO
+* 💾 **MongoDB Persistence** — Messages are stored in MongoDB
+* 👤 **Username-Based Login** — Simple username-based chat entry
+* 🟢 **Online Users** — Displays the number of currently connected users
+* ✍️ **Typing Indicator** — Shows when another user is typing
+* 🕒 **Message Timestamps** — Displays the time each message was sent
+* 🔍 **Message Search** — Search messages by username or message content
+* 🗑️ **Message Deletion** — Users can delete their own messages
+* 📎 **File Attachments** — Supports file uploads
+* 🖼️ **Image Sharing** — Supports sharing image files
+* 📄 **Document Sharing** — Supports supported document and text files
+* 🌙 **Dark Mode** — Light and dark theme support
+* 💾 **Persistent Chat History** — Previous messages remain available after refreshing
+* 📱 **Responsive UI** — Works across desktop, tablet, and mobile devices
+* 🔌 **Connection Handling** — Handles Socket.IO connection and disconnection events
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 
 * React.js
+* Vite
 * JavaScript
 * HTML5
 * CSS3
-* Socket.io Client
+* Socket.IO Client
+* Axios
 
 ### Backend
 
 * Node.js
 * Express.js
-* Socket.io
-* REST API
+* Socket.IO
+* Multer
+* CORS
+* dotenv
 
 ### Database
 
 * MongoDB
 * Mongoose
+
+---
 
 ## 🏗️ Application Architecture
 
@@ -46,79 +60,111 @@ A real-time chat application built with **React, Node.js, Express, MongoDB, and 
                     ┌─────────────────────┐
                     │     React Client    │
                     │                     │
-                    │  Chat UI Components │
-                    │  Socket.io Client   │
+                    │   Chat Components   │
+                    │   Socket.IO Client  │
+                    │   REST API Client   │
                     └──────────┬──────────┘
                                │
                  ┌─────────────┴─────────────┐
                  │                           │
-          REST API Requests          Socket.io Events
+          REST API Requests          Socket.IO Events
                  │                           │
                  ▼                           ▼
         ┌─────────────────────────────────────────┐
         │          Node.js + Express              │
         │                                         │
-        │        REST API + Socket.io             │
+        │       REST API + Socket.IO Server       │
+        │              + Multer                   │
         └──────────────────┬──────────────────────┘
                            │
-                           ▼
-                  ┌─────────────────┐
-                  │     MongoDB     │
-                  │                 │
-                  │ Message History │
-                  └─────────────────┘
+                 ┌─────────┴─────────┐
+                 │                   │
+                 ▼                   ▼
+          ┌─────────────┐     ┌──────────────┐
+          │   MongoDB   │     │    Uploads   │
+          │             │     │              │
+          │ Chat History│     │ Images/Files │
+          └─────────────┘     └──────────────┘
 ```
+
+---
 
 ## 📂 Project Structure
 
 ```text
 vedaz-chat/
 │
-├── client/
+├── backend/
+│   ├── config/
+│   │   └── db.js
+│   │
+│   ├── controllers/
+│   │   └── messageController.js
+│   │
+│   ├── middleware/
+│   │   └── uploadMiddleware.js
+│   │
+│   ├── models/
+│   │   └── Message.js
+│   │
+│   ├── routes/
+│   │   └── messageRoutes.js
+│   │
+│   ├── sockets/
+│   │   └── chatSocket.js
+│   │
+│   ├── uploads/
+│   │   └── .gitkeep
+│   │
+│   ├── .env.example
+│   ├── package.json
+│   └── server.js
+│
+├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Chat/
-│   │   │   ├── Message/
-│   │   │   └── User/
+│   │   │   ├── ChatHeader.jsx
+│   │   │   ├── MessageBubble.jsx
+│   │   │   ├── MessageInput.jsx
+│   │   │   └── MessageList.jsx
 │   │   │
-│   │   ├── pages/
 │   │   ├── services/
-│   │   ├── styles/
+│   │   │   └── chatService.js
+│   │   │
 │   │   ├── App.jsx
+│   │   ├── App.css
 │   │   └── main.jsx
 │   │
 │   ├── package.json
-│   └── ...
-│
-├── server/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── socket/
-│   ├── config/
-│   ├── server.js
-│   ├── package.json
-│   └── ...
+│   └── vite.config.js
 │
 ├── .gitignore
 └── README.md
 ```
 
-> The exact folder names may vary depending on your implementation.
+---
 
 ## ⚙️ How It Works
 
-### 1. User Login
+### 1. Username Login
 
-Users enter a username through the dummy login interface.
+Users enter a username to join the chat.
 
 ```text
-Username → Login → Chat Interface
+Username
+   ↓
+Join Chat
+   ↓
+Socket.IO Connection
+   ↓
+Chat Interface
 ```
 
-No complex authentication system is required for the current implementation.
+No authentication system is currently required.
 
-### 2. Sending a Message
+---
+
+### 2. Real-Time Messaging
 
 When a user sends a message:
 
@@ -126,46 +172,26 @@ When a user sends a message:
 User
   │
   ▼
-React Chat UI
+React Chat Interface
   │
-  ├── REST API
-  │       │
-  │       ▼
-  │    MongoDB
+  ▼
+Socket.IO
   │
-  └── Socket.io
-          │
-          ▼
-    Other Connected User
+  ▼
+Node.js Server
+  │
+  ├──────────────► MongoDB
+  │
+  └──────────────► Connected Users
 ```
 
-The message is persisted in MongoDB while Socket.io provides real-time delivery.
+The message is stored in MongoDB and broadcast to connected clients in real time.
 
-### 3. Real-Time Communication
+---
 
-Socket.io maintains a real-time connection between the frontend and backend.
-
-When a new message is sent:
-
-```text
-User A
-  │
-  │  Send Message
-  ▼
-Socket.io Server
-  │
-  │  Real-time event
-  ▼
-User B
-```
-
-The receiving user sees the message immediately without refreshing the browser.
-
-### 4. Message Persistence
+### 3. Message Persistence
 
 Messages are stored in MongoDB.
-
-This means:
 
 ```text
 Send Message
@@ -174,12 +200,132 @@ Save to MongoDB
      ↓
 Refresh Browser
      ↓
-Fetch Chat History
+Fetch Message History
      ↓
-Previous Messages Still Available
+Previous Messages Available
 ```
 
+The application loads the latest stored messages when the chat is opened.
+
+---
+
+### 4. Online Users
+
+When a user joins:
+
+```text
+User joins
+    ↓
+Socket connection established
+    ↓
+user_online event
+    ↓
+Server tracks connected user
+    ↓
+online_users event
+    ↓
+All clients receive updated count
+```
+
+When the user disconnects, the server removes them from the online user list.
+
+---
+
+### 5. Typing Indicator
+
+When a user starts typing:
+
+```text
+User types
+    ↓
+typing event
+    ↓
+Socket.IO Server
+    ↓
+Other users receive
+user_typing
+```
+
+When the user stops typing, a `user_stop_typing` event is emitted.
+
+---
+
+### 6. File and Image Sharing
+
+Files can be selected using the attachment button.
+
+```text
+Select File
+     ↓
+Frontend File Input
+     ↓
+Upload API
+     ↓
+Multer
+     ↓
+backend/uploads/
+     ↓
+File URL
+     ↓
+Socket.IO Message
+     ↓
+Other Users
+```
+
+Uploaded files are excluded from Git using `.gitignore`.
+
+---
+
+### 7. Message Deletion
+
+Users can delete their own messages.
+
+```text
+Delete Message
+      ↓
+Socket.IO
+      ↓
+Server verifies username
+      ↓
+MongoDB message deleted
+      ↓
+message_deleted event
+      ↓
+All connected clients update
+```
+
+A user cannot delete another user's message.
+
+---
+
+### 8. Message Search
+
+Users can search existing messages by:
+
+* Message content
+* Username
+
+The search is performed on the messages already loaded into the frontend.
+
+---
+
+### 9. Dark Mode
+
+The application supports light and dark themes.
+
+The selected theme is stored in browser `localStorage`, allowing the preference to remain after refreshing the page.
+
+---
+
 ## 🔌 API Endpoints
+
+### Get Messages
+
+```http
+GET /api/messages
+```
+
+Returns the latest stored chat messages.
 
 ### Send Message
 
@@ -187,7 +333,7 @@ Previous Messages Still Available
 POST /api/messages
 ```
 
-Example request:
+Example:
 
 ```json
 {
@@ -196,66 +342,86 @@ Example request:
 }
 ```
 
-### Fetch Message History
+### Upload File
 
 ```http
-GET /api/messages
+POST /api/messages/upload
 ```
 
-Returns previously stored messages from MongoDB.
+Uses `multipart/form-data`.
 
-> Update the endpoint paths above if your actual backend routes use different names.
-
-## 🔄 Socket.io Events
-
-The application uses Socket.io for real-time communication.
-
-Typical flow:
+Form field:
 
 ```text
-Client connects
-      ↓
-Socket connection established
-      ↓
-User becomes online
-      ↓
-Message event emitted
-      ↓
-Server receives event
-      ↓
-Message broadcast
-      ↓
-Connected clients receive message
+file
 ```
 
-The application also handles connection and disconnection events to maintain online/offline status.
+---
 
-## 🖥️ User Interface
+## 🔄 Socket.IO Events
 
-The chat interface includes:
-
-* Username/login screen
-* Chat window
-* Message input
-* Send button
-* Message timestamps
-* Online/offline status
-* Chat history
-* Responsive layout
-
-## 📱 Responsive Design
-
-Vedaz Chat is designed to work across different screen sizes:
+### Client → Server
 
 ```text
-Desktop 💻
-     ↓
-Tablet 📱
-     ↓
-Mobile 📱
+user_online
+typing
+stop_typing
+send_message
+delete_message
 ```
 
-The layout adapts to smaller screens while maintaining the core messaging experience.
+### Server → Client
+
+```text
+online_users
+user_typing
+user_stop_typing
+new_message
+message_deleted
+message_error
+```
+
+---
+
+## 📎 File Upload
+
+Multer is used to handle file uploads.
+
+Uploaded files are stored locally in:
+
+```text
+backend/uploads/
+```
+
+The upload directory is excluded from Git so that uploaded files are not committed to the repository.
+
+The application can handle supported image and file types within the configured upload size limit.
+
+---
+
+## 🔐 Environment Variables
+
+Create:
+
+```text
+backend/.env
+```
+
+Example:
+
+```env
+PORT=5000
+CLIENT_URL=http://localhost:5173
+MONGODB_URI=your_mongodb_connection_string
+```
+
+For security:
+
+> Never commit the real `.env` file to GitHub.
+
+A `.env.example` file is included to show the required environment variables.
+
+---
 
 ## 🔧 Installation
 
@@ -267,124 +433,150 @@ Make sure you have installed:
 * npm
 * MongoDB
 
-### Clone the Repository
+### Clone Repository
 
 ```bash
 git clone https://github.com/your-username/vedaz-chat.git
 cd vedaz-chat
 ```
 
-### Install Backend Dependencies
+---
+
+## 📦 Backend Setup
 
 ```bash
-cd server
+cd backend
 npm install
 ```
 
-### Install Frontend Dependencies
-
-Open another terminal:
-
-```bash
-cd client
-npm install
-```
-
-## 🔐 Environment Variables
-
-Create a `.env` file inside the backend/server directory.
+Create your `.env` file:
 
 ```env
 PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/vedaz-chat
+CLIENT_URL=http://localhost:5173
+MONGODB_URI=your_mongodb_connection_string
 ```
 
-Add any additional environment variables required by your implementation.
-
-> Never commit your `.env` file to GitHub.
-
-## ▶️ Running the Application
-
-### Start the Backend
+Start the backend:
 
 ```bash
-cd server
 npm run dev
 ```
 
-The backend will run on:
+Backend:
 
 ```text
 http://localhost:5000
 ```
 
-### Start the Frontend
+---
 
-In another terminal:
+## 💻 Frontend Setup
+
+Open another terminal:
 
 ```bash
-cd client
+cd frontend
+npm install
+```
+
+Start the frontend:
+
+```bash
 npm run dev
 ```
 
-The React application will normally be available at:
+Frontend:
 
 ```text
 http://localhost:5173
 ```
 
-## 🧪 Testing Real-Time Messaging
+---
 
-To test Socket.io functionality:
+## 🧪 Testing
+
+To test the real-time functionality:
 
 1. Start the backend.
-2. Start the React frontend.
-3. Open the application in two browser windows/tabs.
-4. Login with different usernames.
-5. Send a message from one user.
-6. Verify that the second user receives it instantly.
-7. Refresh the page.
-8. Verify that previous messages are still available.
-9. Disconnect one client and verify its connection/offline handling.
+2. Start the frontend.
+3. Open the application in two browser windows.
+4. Join with different usernames.
+5. Send messages between users.
+6. Verify real-time delivery.
+7. Test the typing indicator.
+8. Test online user count.
+9. Search messages.
+10. Delete your own message.
+11. Toggle dark mode.
+12. Share an image or supported file.
+13. Refresh the browser and verify message history.
+
+---
+
+## 📱 Responsive Design
+
+Vedaz Chat supports:
+
+```text
+Desktop 💻
+     ↓
+Tablet
+     ↓
+Mobile 📱
+```
+
+The chat layout automatically adapts to smaller screen sizes.
+
+---
 
 ## 🎯 Project Objectives
 
-Vedaz Chat was developed to demonstrate practical implementation of:
+This project demonstrates practical implementation of:
 
 * Real-time web communication
+* Socket.IO
 * REST API development
-* WebSocket-based messaging
 * MongoDB data persistence
+* Mongoose
 * React component architecture
 * Client-server communication
+* File uploads using Multer
 * Connection state management
-* Responsive frontend development
+* Search functionality
+* Dark mode
+* Responsive UI development
+
+---
 
 ## 🔮 Future Improvements
 
-Possible future enhancements include:
+Possible future enhancements:
 
 * 👥 Multiple chat rooms
+* 🔐 User authentication
 * 👤 User profiles
-* 🟢 More detailed presence indicators
-* ✍️ Typing indicators
-* ✓ Message delivery/read status
-* 🗑️ Message deletion
-<!-- * 📎 File and image sharing
-* 🔔 Notifications
-* 🔍 Message search
-* 🌙 Dark mode
-* 👥 Group conversations -->
+* 🔒 Private messaging
+* ✓ Message read receipts
+* ✏️ Message editing
+* 😀 Message reactions
+* ☁️ Cloud file storage
+* 🖼️ Better image previews
+* 🚀 Production deployment
+* 🔔 Push notifications
+
+---
 
 ## 📸 Screenshots
 
-Add screenshots of your application here:
+Add screenshots of the application here:
 
 ```text
 screenshots/
 ├── login.png
 ├── chat.png
-├── online-status.png
+├── dark-mode.png
+├── file-sharing.png
 └── mobile-chat.png
 ```
 
@@ -394,13 +586,20 @@ Example:
 ![Vedaz Chat Login](screenshots/login.png)
 
 ![Vedaz Chat](screenshots/chat.png)
+
+![Vedaz Chat Dark Mode](screenshots/dark-mode.png)
 ```
+
+---
 
 ## 👨‍💻 Author
 
 **Vikhnesh Sathyan**
 
-MCA Graduate | MERN Stack Developer
+MCA Graduate | Full Stack Developer
 
 ---
 
+## 📄 License
+
+This project was developed for learning and development purposes.

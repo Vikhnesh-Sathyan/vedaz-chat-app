@@ -1,29 +1,39 @@
-
 const MessageBubble = ({
   message,
   currentUsername,
   onDelete,
 }) => {
-  const isOwnMessage = message.username === currentUsername;
+  const isOwnMessage =
+    message.username ===
+    currentUsername;
 
-  const formattedTime = new Date(
-    message.createdAt
-  ).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const formattedTime =
+    new Date(
+      message.createdAt
+    ).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-  const handleDelete = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this message?"
+  // ============================
+  // CHECK FILE TYPE
+  // ============================
+
+  const isImage =
+    message.fileType?.startsWith(
+      "image/"
     );
 
-    if (!confirmed) {
-      return;
-    }
+  const hasFile =
+    Boolean(message.fileUrl);
 
-    onDelete(message._id);
-  };
+  // ============================
+  // FILE URL
+  // ============================
+
+  const fileUrl = hasFile
+    ? `http://localhost:5000${message.fileUrl}`
+    : null;
 
   return (
     <div
@@ -34,6 +44,10 @@ const MessageBubble = ({
       }`}
     >
 
+      {/* ============================
+          USERNAME
+      ============================ */}
+
       {!isOwnMessage && (
         <div className="message-username">
           {message.username}
@@ -42,20 +56,75 @@ const MessageBubble = ({
 
       <div className="message-content">
 
-        <div className="message-text">
-          {message.message}
-        </div>
+        {/* ============================
+            TEXT MESSAGE
+        ============================ */}
+
+        {message.message && (
+          <div className="message-text">
+            {message.message}
+          </div>
+        )}
+
+        {/* ============================
+            IMAGE
+        ============================ */}
+
+        {isImage && fileUrl && (
+          <div className="message-image-wrapper">
+            <img
+              src={fileUrl}
+              alt={
+                message.fileName ||
+                "Shared image"
+              }
+              className="message-image"
+              onError={(event) => {
+                event.currentTarget.style.display =
+                  "none";
+              }}
+            />
+          </div>
+        )}
+
+        {/* ============================
+            OTHER FILE
+        ============================ */}
+
+        {!isImage && fileUrl && (
+          <a
+            href={fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="message-file"
+          >
+            📎{" "}
+            {message.fileName ||
+              "Open file"}
+          </a>
+        )}
+
+        {/* ============================
+            MESSAGE FOOTER
+        ============================ */}
 
         <div className="message-footer">
 
-          <div className="message-time">
+          <span className="message-time">
             {formattedTime}
-          </div>
+          </span>
+
+          {/* DELETE ONLY OWN MESSAGE */}
 
           {isOwnMessage && (
             <button
+              type="button"
               className="delete-message-btn"
-              onClick={handleDelete}
+              onClick={() =>
+                onDelete(
+                  message._id
+                )
+              }
               title="Delete message"
             >
               🗑️
@@ -63,12 +132,9 @@ const MessageBubble = ({
           )}
 
         </div>
-
       </div>
-
     </div>
   );
 };
 
 export default MessageBubble;
-

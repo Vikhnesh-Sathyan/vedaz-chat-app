@@ -8,10 +8,38 @@ const messageSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // ============================
+    // TEXT MESSAGE
+    // ============================
+
     message: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
+    },
+
+    // ============================
+    // FILE INFORMATION
+    // ============================
+
+    fileUrl: {
+      type: String,
+      default: null,
+    },
+
+    fileName: {
+      type: String,
+      default: null,
+    },
+
+    fileType: {
+      type: String,
+      default: null,
+    },
+
+    fileSize: {
+      type: Number,
+      default: null,
     },
   },
   {
@@ -19,4 +47,7 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Message", messageSchema);
+module.exports = mongoose.model(
+  "Message",
+  messageSchema
+);
