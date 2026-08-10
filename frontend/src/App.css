@@ -55,31 +55,7 @@ body {
 }
 
 
-/* =========================================
-   HEADER
-========================================= */
 
-.chat-header {
-  padding: 20px 24px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.chat-header h1 {
-  font-size: 22px;
-}
-
-.chat-header p {
-  margin-top: 4px;
-
-  color: #6b7280;
-
-  font-size: 14px;
-}
 
 .user-info {
   display: flex;
@@ -631,5 +607,557 @@ body {
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 4px;
+}
+
+/* =========================================
+   MESSAGE SEARCH
+========================================= */
+
+.search-container {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 12px 20px;
+
+  padding: 0 12px;
+
+  height: 42px;
+
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 10px;
+
+  transition: 0.2s;
+}
+
+.search-container:focus-within {
+  border-color: #2563eb;
+
+  background: white;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.search-icon {
+  font-size: 15px;
+}
+
+.search-container input {
+  flex: 1;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  font-size: 14px;
+
+  color: #111827;
+}
+
+.search-container input::placeholder {
+  color: #9ca3af;
+}
+
+.clear-search {
+  border: none;
+
+  background: transparent;
+
+  color: #6b7280;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  padding: 4px;
+}
+
+.clear-search:hover {
+  color: #111827;
+}
+
+
+
+/* =========================================
+   CHAT HEADER
+========================================= */
+
+.chat-header {
+  width: 100%;
+
+  padding: 18px 24px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   CHAT TITLE
+========================================= */
+
+.chat-title h1 {
+  margin: 0;
+
+  font-size: 22px;
+
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.chat-title p {
+  margin: 4px 0 0;
+
+  font-size: 13px;
+
+  color: #6b7280;
+}
+
+
+/* =========================================
+   HEADER RIGHT SIDE
+========================================= */
+
+.chat-header-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+}
+
+
+/* =========================================
+   DARK MODE BUTTON
+========================================= */
+
+.theme-toggle {
+  width: 40px;
+
+  height: 40px;
+
+  padding: 0;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 50%;
+
+  background: #f9fafb;
+
+  color: #111827;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.08);
+
+  background: #f3f4f6;
+}
+
+
+/* =========================================
+   USER INFO
+========================================= */
+
+.user-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #111827;
+}
+
+
+/* =========================================
+   ONLINE DOT
+========================================= */
+
+.online-dot {
+  width: 9px;
+
+  height: 9px;
+
+  display: block;
+
+  background: #22c55e;
+
+  border-radius: 50%;
+}
+
+
+/* =========================================
+   DARK MODE HEADER
+========================================= */
+
+.dark-mode .chat-header {
+  background: #1f2937;
+
+  border-bottom-color: #374151;
+}
+
+.dark-mode .chat-title h1 {
+  color: #f9fafb;
+}
+
+.dark-mode .chat-title p {
+  color: #9ca3af;
+}
+
+.dark-mode .user-info {
+  color: #f9fafb;
+}
+
+.dark-mode .theme-toggle {
+  background: #374151;
+
+  border-color: #4b5563;
+
+  color: #ffffff;
+}
+
+.dark-mode .theme-toggle:hover {
+  background: #4b5563;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .chat-header {
+    padding: 15px 16px;
+  }
+
+  .chat-title h1 {
+    font-size: 19px;
+  }
+
+  .chat-title p {
+    font-size: 12px;
+  }
+
+  .chat-header-actions {
+    gap: 9px;
+  }
+
+  .theme-toggle {
+    width: 36px;
+
+    height: 36px;
+
+    font-size: 16px;
+  }
+
+  .user-info {
+    font-size: 12px;
+  }
+
+}
+
+
+/* =========================================
+   COMPLETE DARK MODE
+========================================= */
+
+/* Main page */
+
+.dark-mode {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+
+/* =========================================
+   CHAT CONTAINER
+========================================= */
+
+.dark-mode .chat-container {
+  background: #111827;
+
+  color: #f8fafc;
+
+  box-shadow:
+    0 15px 45px rgba(0, 0, 0, 0.4);
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.dark-mode .chat-header {
+  background: #111827;
+
+  border-bottom: 1px solid #374151;
+}
+
+.dark-mode .chat-title h1 {
+  color: #f9fafb;
+}
+
+.dark-mode .chat-title p {
+  color: #9ca3af;
+}
+
+.dark-mode .user-info {
+  color: #f9fafb;
+}
+
+
+/* =========================================
+   THEME BUTTON
+========================================= */
+
+.dark-mode .theme-toggle {
+  background: #1f2937;
+
+  border: 1px solid #4b5563;
+
+  color: #f9fafb;
+}
+
+.dark-mode .theme-toggle:hover {
+  background: #374151;
+}
+
+
+/* =========================================
+   MESSAGE AREA
+========================================= */
+
+.dark-mode .message-list {
+  background: #111827;
+}
+
+
+/* Other user's message */
+
+.dark-mode .message-other .message-text {
+  background: #374151;
+
+  color: #f9fafb;
+}
+
+
+/* Own message */
+
+.dark-mode .message-own .message-text {
+  background: #2563eb;
+
+  color: #ffffff;
+}
+
+
+/* Username */
+
+.dark-mode .message-username {
+  color: #9ca3af;
+}
+
+
+/* Time */
+
+.dark-mode .message-time {
+  color: #9ca3af;
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.dark-mode .search-container {
+  background: #1f2937;
+
+  border: 1px solid #374151;
+}
+
+.dark-mode .search-container:focus-within {
+  background: #1f2937;
+
+  border-color: #60a5fa;
+
+  box-shadow:
+    0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.dark-mode .search-container input {
+  color: #f9fafb;
+
+  background: transparent;
+}
+
+.dark-mode .search-container input::placeholder {
+  color: #9ca3af;
+}
+
+.dark-mode .search-icon {
+  color: #d1d5db;
+}
+
+.dark-mode .clear-search {
+  color: #9ca3af;
+}
+
+.dark-mode .clear-search:hover {
+  color: #ffffff;
+}
+
+
+/* =========================================
+   TYPING INDICATOR
+========================================= */
+
+.dark-mode .typing-indicator {
+  background: #111827;
+
+  color: #9ca3af;
+}
+
+
+/* =========================================
+   MESSAGE INPUT AREA
+========================================= */
+
+.dark-mode .message-input-container {
+  background: #111827;
+
+  border-top: 1px solid #374151;
+}
+
+
+/* Input */
+
+.dark-mode .message-input-container input {
+  background: #1f2937;
+
+  border: 1px solid #4b5563;
+
+  color: #f9fafb;
+}
+
+.dark-mode .message-input-container input::placeholder {
+  color: #9ca3af;
+}
+
+.dark-mode .message-input-container input:focus {
+  background: #1f2937;
+
+  border-color: #60a5fa;
+
+  box-shadow:
+    0 0 0 3px rgba(96, 165, 250, 0.12);
+}
+
+
+/* Send button */
+
+.dark-mode .message-input-container button {
+  background: #2563eb;
+
+  color: #ffffff;
+}
+
+.dark-mode .message-input-container button:hover {
+  background: #1d4ed8;
+}
+
+
+/* =========================================
+   EMPTY CHAT
+========================================= */
+
+.dark-mode .empty-chat {
+  color: #9ca3af;
+}
+
+.dark-mode .empty-chat h3 {
+  color: #f3f4f6;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.dark-mode .loading {
+  background: #111827;
+
+  color: #9ca3af;
+}
+
+
+/* =========================================
+   DELETE BUTTON
+========================================= */
+
+.dark-mode .delete-message-btn {
+  color: #d1d5db;
+}
+
+.dark-mode .delete-message-btn:hover {
+  background: #450a0a;
+}
+
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+.dark-mode .message-list::-webkit-scrollbar {
+  width: 7px;
+}
+
+.dark-mode .message-list::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+.dark-mode .message-list::-webkit-scrollbar-thumb {
+  background: #374151;
+
+  border-radius: 10px;
+}
+
+.dark-mode .message-list::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
 }
 

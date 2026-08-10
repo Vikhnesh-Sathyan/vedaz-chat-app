@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -12,18 +13,84 @@ import "./App.css";
 const SOCKET_URL = "http://localhost:5000";
 
 function App() {
+  // ============================
+  // USER
+  // ============================
+
   const [username, setUsername] = useState("");
   const [usernameInput, setUsernameInput] = useState("");
 
+  // ============================
+  // MESSAGES
+  // ============================
+
   const [messages, setMessages] = useState([]);
+
+  // ============================
+  // SOCKET
+  // ============================
+
   const [socket, setSocket] = useState(null);
+
+  // ============================
+  // LOADING
+  // ============================
 
   const [loading, setLoading] = useState(false);
 
+  // ============================
+  // ONLINE USERS
+  // ============================
+
   const [onlineUsers, setOnlineUsers] = useState([]);
 
-  // Typing indicator
+  // ============================
+  // TYPING INDICATOR
+  // ============================
+
   const [typingUser, setTypingUser] = useState("");
+
+  // ============================
+  // SEARCH
+  // ============================
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // ============================
+  // DARK MODE
+  // ============================
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return (
+      localStorage.getItem("vedaz-dark-mode") ===
+      "true"
+    );
+  });
+
+  // ============================
+  // SAVE DARK MODE
+  // ============================
+
+  useEffect(() => {
+    localStorage.setItem(
+      "vedaz-dark-mode",
+      darkMode
+    );
+  }, [darkMode]);
+
+  // ============================
+  // TOGGLE DARK MODE
+  // ============================
+
+  const toggleDarkMode = () => {
+    setDarkMode(
+      (previousMode) => !previousMode
+    );
+  };
+
+  // ============================
+  // SOCKET CONNECTION
+  // ============================
 
   useEffect(() => {
     if (!username) {
@@ -38,7 +105,10 @@ function App() {
     // USER ONLINE
     // ============================
 
-    newSocket.emit("user_online", username);
+    newSocket.emit(
+      "user_online",
+      username
+    );
 
     // ============================
     // LOAD OLD MESSAGES
@@ -54,7 +124,10 @@ function App() {
           setMessages(data.messages);
         }
       } catch (error) {
-        console.error("Failed to load messages:", error);
+        console.error(
+          "Failed to load messages:",
+          error
+        );
       } finally {
         setLoading(false);
       }
@@ -67,70 +140,104 @@ function App() {
     // ============================
 
     newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
+      console.log(
+        "Socket connected:",
+        newSocket.id
+      );
     });
 
     // ============================
     // ONLINE USERS
     // ============================
 
-    newSocket.on("online_users", (users) => {
-      setOnlineUsers(users);
-    });
+    newSocket.on(
+      "online_users",
+      (users) => {
+        setOnlineUsers(users);
+      }
+    );
 
     // ============================
     // NEW MESSAGE
     // ============================
 
-    newSocket.on("new_message", (newMessage) => {
-      setMessages((previousMessages) => [
-        ...previousMessages,
-        newMessage,
-      ]);
-    });
+    newSocket.on(
+      "new_message",
+      (newMessage) => {
+        setMessages(
+          (previousMessages) => [
+            ...previousMessages,
+            newMessage,
+          ]
+        );
+      }
+    );
 
-    newSocket.on("message_deleted", (messageId) => {
-  setMessages((previousMessages) =>
-    previousMessages.filter(
-      (message) => message._id !== messageId
-    )
-  );
-});
+    // ============================
+    // MESSAGE DELETED
+    // ============================
+
+    newSocket.on(
+      "message_deleted",
+      (messageId) => {
+        setMessages(
+          (previousMessages) =>
+            previousMessages.filter(
+              (message) =>
+                message._id !== messageId
+            )
+        );
+      }
+    );
 
     // ============================
     // USER TYPING
     // ============================
 
-    newSocket.on("user_typing", (user) => {
-      if (user !== username) {
-        setTypingUser(user);
+    newSocket.on(
+      "user_typing",
+      (user) => {
+        if (user !== username) {
+          setTypingUser(user);
+        }
       }
-    });
+    );
 
     // ============================
     // USER STOPPED TYPING
     // ============================
 
-    newSocket.on("user_stop_typing", (user) => {
-      if (user !== username) {
-        setTypingUser("");
+    newSocket.on(
+      "user_stop_typing",
+      (user) => {
+        if (user !== username) {
+          setTypingUser("");
+        }
       }
-    });
+    );
 
     // ============================
     // MESSAGE ERROR
     // ============================
 
-    newSocket.on("message_error", (error) => {
-      console.error("Message error:", error.message);
-    });
+    newSocket.on(
+      "message_error",
+      (error) => {
+        console.error(
+          "Message error:",
+          error.message
+        );
+      }
+    );
 
     // ============================
     // DISCONNECT
     // ============================
 
     newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
+      console.log(
+        "Socket disconnected"
+      );
     });
 
     // ============================
@@ -147,10 +254,13 @@ function App() {
   // USERNAME SUBMIT
   // ============================
 
-  const handleUsernameSubmit = (event) => {
+  const handleUsernameSubmit = (
+    event
+  ) => {
     event.preventDefault();
 
-    const trimmedUsername = usernameInput.trim();
+    const trimmedUsername =
+      usernameInput.trim();
 
     if (!trimmedUsername) {
       return;
@@ -159,43 +269,80 @@ function App() {
     setUsername(trimmedUsername);
   };
 
-// ============================
-// SEND MESSAGE
-// ============================
+  // ============================
+  // SEND MESSAGE
+  // ============================
 
-const handleSendMessage = (message) => {
-  if (!socket) {
-    console.error("Socket is not connected");
-    return;
-  }
+  const handleSendMessage = (
+    message
+  ) => {
+    if (!socket) {
+      console.error(
+        "Socket is not connected"
+      );
+      return;
+    }
 
-  const trimmedMessage = message.trim();
+    const trimmedMessage =
+      message.trim();
 
-  if (!trimmedMessage) {
-    return;
-  }
+    if (!trimmedMessage) {
+      return;
+    }
 
-  socket.emit("send_message", {
-    username,
-    message: trimmedMessage,
-  });
-};
+    socket.emit("send_message", {
+      username,
+      message: trimmedMessage,
+    });
+  };
 
-// ============================
-// DELETE MESSAGE
-// ============================
+  // ============================
+  // DELETE MESSAGE
+  // ============================
 
-const handleDeleteMessage = (messageId) => {
-  if (!socket) {
-    console.error("Socket is not connected");
-    return;
-  }
+  const handleDeleteMessage = (
+    messageId
+  ) => {
+    if (!socket) {
+      console.error(
+        "Socket is not connected"
+      );
+      return;
+    }
 
-  socket.emit("delete_message", {
-    messageId,
-    username,
-  });
-};
+    socket.emit(
+      "delete_message",
+      {
+        messageId,
+        username,
+      }
+    );
+  };
+
+  // ============================
+  // SEARCH MESSAGES
+  // ============================
+
+  const filteredMessages =
+    messages.filter((message) => {
+      const search =
+        searchTerm
+          .toLowerCase()
+          .trim();
+
+      if (!search) {
+        return true;
+      }
+
+      return (
+        message.message
+          .toLowerCase()
+          .includes(search) ||
+        message.username
+          .toLowerCase()
+          .includes(search)
+      );
+    });
 
   // ============================
   // LOGIN SCREEN
@@ -203,7 +350,13 @@ const handleDeleteMessage = (messageId) => {
 
   if (!username) {
     return (
-      <div className="login-container">
+      <div
+        className={`login-container ${
+          darkMode
+            ? "dark-mode"
+            : ""
+        }`}
+      >
         <div className="username-card">
 
           <div className="logo">
@@ -213,15 +366,22 @@ const handleDeleteMessage = (messageId) => {
           <h1>Vedaz Chat</h1>
 
           <p>
-            Enter your username to join the conversation.
+            Enter your username to join
+            the conversation.
           </p>
 
-          <form onSubmit={handleUsernameSubmit}>
+          <form
+            onSubmit={
+              handleUsernameSubmit
+            }
+          >
             <input
               type="text"
               value={usernameInput}
               onChange={(event) =>
-                setUsernameInput(event.target.value)
+                setUsernameInput(
+                  event.target.value
+                )
               }
               placeholder="Enter username"
               maxLength={30}
@@ -243,14 +403,62 @@ const handleDeleteMessage = (messageId) => {
   // ============================
 
   return (
-    <div className="app-container">
-
+    <div
+      className={`app-container ${
+        darkMode
+          ? "dark-mode"
+          : ""
+      }`}
+    >
       <div className="chat-container">
+
+        {/* HEADER */}
 
         <ChatHeader
           username={username}
-          onlineUsers={onlineUsers}
+          onlineUsers={
+            onlineUsers
+          }
+          darkMode={darkMode}
+          onToggleDarkMode={
+            toggleDarkMode
+          }
         />
+
+        {/* SEARCH */}
+
+        <div className="search-container">
+
+          <span className="search-icon">
+            🔍
+          </span>
+
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(event) =>
+              setSearchTerm(
+                event.target.value
+              )
+            }
+            placeholder="Search messages..."
+          />
+
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={() =>
+                setSearchTerm("")
+              }
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+
+        </div>
+
+        {/* MESSAGES */}
 
         {loading ? (
           <div className="loading">
@@ -258,30 +466,39 @@ const handleDeleteMessage = (messageId) => {
           </div>
         ) : (
           <MessageList
-  messages={messages}
-  currentUsername={username}
-  onDelete={handleDeleteMessage}
-/>
+            messages={
+              filteredMessages
+            }
+            currentUsername={
+              username
+            }
+            onDelete={
+              handleDeleteMessage
+            }
+          />
         )}
 
         {/* TYPING INDICATOR */}
 
         {typingUser && (
           <div className="typing-indicator">
-            <span>{typingUser} is typing</span>
+            <span>
+              {typingUser} is typing
+            </span>
           </div>
         )}
 
         {/* MESSAGE INPUT */}
 
         <MessageInput
-          onSend={handleSendMessage}
+          onSend={
+            handleSendMessage
+          }
           socket={socket}
           username={username}
         />
 
       </div>
-
     </div>
   );
 }
