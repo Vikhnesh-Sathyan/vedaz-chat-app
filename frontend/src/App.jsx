@@ -13,6 +13,7 @@ import "./App.css";
 const SOCKET_URL = "http://localhost:5000";
 
 function App() {
+
   // ============================
   // USER
   // ============================
@@ -45,7 +46,7 @@ function App() {
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   // ============================
-  // TYPING INDICATOR
+  // TYPING
   // ============================
 
   const [typingUser, setTypingUser] = useState("");
@@ -62,8 +63,7 @@ function App() {
 
   const [darkMode, setDarkMode] = useState(() => {
     return (
-      localStorage.getItem("vedaz-dark-mode") ===
-      "true"
+      localStorage.getItem("vedaz-dark-mode") === "true"
     );
   });
 
@@ -83,9 +83,7 @@ function App() {
   // ============================
 
   const toggleDarkMode = () => {
-    setDarkMode(
-      (previousMode) => !previousMode
-    );
+    setDarkMode((previousMode) => !previousMode);
   };
 
   // ============================
@@ -93,6 +91,7 @@ function App() {
   // ============================
 
   useEffect(() => {
+
     if (!username) {
       return;
     }
@@ -115,7 +114,9 @@ function App() {
     // ============================
 
     const loadMessages = async () => {
+
       try {
+
         setLoading(true);
 
         const data = await getMessages();
@@ -123,14 +124,20 @@ function App() {
         if (data.success) {
           setMessages(data.messages);
         }
+
       } catch (error) {
+
         console.error(
           "Failed to load messages:",
           error
         );
+
       } finally {
+
         setLoading(false);
+
       }
+
     };
 
     loadMessages();
@@ -140,10 +147,12 @@ function App() {
     // ============================
 
     newSocket.on("connect", () => {
+
       console.log(
         "Socket connected:",
         newSocket.id
       );
+
     });
 
     // ============================
@@ -164,12 +173,14 @@ function App() {
     newSocket.on(
       "new_message",
       (newMessage) => {
+
         setMessages(
           (previousMessages) => [
             ...previousMessages,
             newMessage,
           ]
         );
+
       }
     );
 
@@ -180,6 +191,7 @@ function App() {
     newSocket.on(
       "message_deleted",
       (messageId) => {
+
         setMessages(
           (previousMessages) =>
             previousMessages.filter(
@@ -187,6 +199,7 @@ function App() {
                 message._id !== messageId
             )
         );
+
       }
     );
 
@@ -197,9 +210,11 @@ function App() {
     newSocket.on(
       "user_typing",
       (user) => {
+
         if (user !== username) {
           setTypingUser(user);
         }
+
       }
     );
 
@@ -210,9 +225,11 @@ function App() {
     newSocket.on(
       "user_stop_typing",
       (user) => {
+
         if (user !== username) {
           setTypingUser("");
         }
+
       }
     );
 
@@ -223,10 +240,12 @@ function App() {
     newSocket.on(
       "message_error",
       (error) => {
+
         console.error(
           "Message error:",
           error.message
         );
+
       }
     );
 
@@ -235,9 +254,11 @@ function App() {
     // ============================
 
     newSocket.on("disconnect", () => {
+
       console.log(
         "Socket disconnected"
       );
+
     });
 
     // ============================
@@ -245,18 +266,20 @@ function App() {
     // ============================
 
     return () => {
+
       newSocket.disconnect();
       setSocket(null);
+
     };
+
   }, [username]);
 
   // ============================
   // USERNAME SUBMIT
   // ============================
 
-  const handleUsernameSubmit = (
-    event
-  ) => {
+  const handleUsernameSubmit = (event) => {
+
     event.preventDefault();
 
     const trimmedUsername =
@@ -273,13 +296,14 @@ function App() {
   // SEND MESSAGE
   // ============================
 
-  const handleSendMessage = (
-    message
-  ) => {
+  const handleSendMessage = (message) => {
+
     if (!socket) {
+
       console.error(
         "Socket is not connected"
       );
+
       return;
     }
 
@@ -290,23 +314,27 @@ function App() {
       return;
     }
 
-    socket.emit("send_message", {
-      username,
-      message: trimmedMessage,
-    });
+    socket.emit(
+      "send_message",
+      {
+        username,
+        message: trimmedMessage,
+      }
+    );
   };
 
   // ============================
   // DELETE MESSAGE
   // ============================
 
-  const handleDeleteMessage = (
-    messageId
-  ) => {
+  const handleDeleteMessage = (messageId) => {
+
     if (!socket) {
+
       console.error(
         "Socket is not connected"
       );
+
       return;
     }
 
@@ -320,11 +348,12 @@ function App() {
   };
 
   // ============================
-  // SEARCH MESSAGES
+  // FILTER SEARCH
   // ============================
 
   const filteredMessages =
     messages.filter((message) => {
+
       const search =
         searchTerm
           .toLowerCase()
@@ -342,6 +371,7 @@ function App() {
           .toLowerCase()
           .includes(search)
       );
+
     });
 
   // ============================
@@ -349,14 +379,14 @@ function App() {
   // ============================
 
   if (!username) {
+
     return (
       <div
         className={`login-container ${
-          darkMode
-            ? "dark-mode"
-            : ""
+          darkMode ? "dark-mode" : ""
         }`}
       >
+
         <div className="username-card">
 
           <div className="logo">
@@ -375,6 +405,7 @@ function App() {
               handleUsernameSubmit
             }
           >
+
             <input
               type="text"
               value={usernameInput}
@@ -391,9 +422,11 @@ function App() {
             <button type="submit">
               Join Chat
             </button>
+
           </form>
 
         </div>
+
       </div>
     );
   }
@@ -405,20 +438,17 @@ function App() {
   return (
     <div
       className={`app-container ${
-        darkMode
-          ? "dark-mode"
-          : ""
+        darkMode ? "dark-mode" : ""
       }`}
     >
+
       <div className="chat-container">
 
         {/* HEADER */}
 
         <ChatHeader
           username={username}
-          onlineUsers={
-            onlineUsers
-          }
+          onlineUsers={onlineUsers}
           darkMode={darkMode}
           onToggleDarkMode={
             toggleDarkMode
@@ -445,7 +475,9 @@ function App() {
           />
 
           {searchTerm && (
+
             <button
+              type="button"
               className="clear-search"
               onClick={() =>
                 setSearchTerm("")
@@ -454,6 +486,7 @@ function App() {
             >
               ✕
             </button>
+
           )}
 
         </div>
@@ -461,44 +494,47 @@ function App() {
         {/* MESSAGES */}
 
         {loading ? (
+
           <div className="loading">
             Loading messages...
           </div>
+
         ) : (
+
           <MessageList
-            messages={
-              filteredMessages
-            }
-            currentUsername={
-              username
-            }
+            messages={filteredMessages}
+            currentUsername={username}
             onDelete={
               handleDeleteMessage
             }
           />
+
         )}
 
         {/* TYPING INDICATOR */}
 
         {typingUser && (
+
           <div className="typing-indicator">
+
             <span>
               {typingUser} is typing
             </span>
+
           </div>
+
         )}
 
         {/* MESSAGE INPUT */}
 
         <MessageInput
-          onSend={
-            handleSendMessage
-          }
+          onSend={handleSendMessage}
           socket={socket}
           username={username}
         />
 
       </div>
+
     </div>
   );
 }

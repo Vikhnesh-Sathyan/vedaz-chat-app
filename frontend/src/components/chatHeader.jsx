@@ -29,6 +29,11 @@ const ChatHeader = ({
           type="button"
           className="theme-toggle"
           onClick={onToggleDarkMode}
+          title={
+            darkMode
+              ? "Switch to light mode"
+              : "Switch to dark mode"
+          }
           aria-label="Toggle dark mode"
         >
           {darkMode ? "☀️" : "🌙"}
@@ -37,7 +42,6 @@ const ChatHeader = ({
         {/* CURRENT USER */}
         <div className="user-info">
           <span className="online-dot"></span>
-
           <span>{username}</span>
         </div>
 
