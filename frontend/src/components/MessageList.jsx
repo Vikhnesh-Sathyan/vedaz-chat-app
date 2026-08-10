@@ -1,8 +1,14 @@
+
 import MessageBubble from "./MessageBubble";
 
-const MessageList = ({ messages, currentUsername }) => {
+const MessageList = ({
+  messages,
+  currentUsername,
+  onDelete,
+}) => {
   return (
     <div className="message-list">
+
       {messages.length === 0 ? (
         <div className="empty-chat">
           <h3>No messages yet</h3>
@@ -14,11 +20,14 @@ const MessageList = ({ messages, currentUsername }) => {
             key={message._id}
             message={message}
             currentUsername={currentUsername}
+            onDelete={onDelete}
           />
         ))
       )}
+
     </div>
   );
 };
 
 export default MessageList;
+

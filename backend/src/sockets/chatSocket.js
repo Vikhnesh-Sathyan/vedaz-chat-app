@@ -64,6 +64,53 @@ const initializeSocket = (io) => {
       }
     });
 
+    
+// ============================
+// DELETE MESSAGE
+// ============================
+
+socket.on("delete_message", async (data) => {
+  try {
+    const { messageId, username } = data;
+
+    if (!messageId || !username) {
+      return;
+    }
+
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      socket.emit("message_error", {
+        message: "Message not found",
+      });
+
+      return;
+    }
+
+    // Only the original sender can delete
+    if (message.username !== username) {
+      socket.emit("message_error", {
+        message: "You can only delete your own messages",
+      });
+
+      return;
+    }
+
+    await Message.findByIdAndDelete(messageId);
+
+    // Notify every connected client
+    io.emit("message_deleted", messageId);
+
+  } catch (error) {
+    console.error("Delete message error:", error);
+
+    socket.emit("message_error", {
+      message: "Failed to delete message",
+    });
+  }
+});
+
+
     // ============================
     // DISCONNECT
     // ============================

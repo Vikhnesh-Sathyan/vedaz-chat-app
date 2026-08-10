@@ -89,6 +89,14 @@ function App() {
       ]);
     });
 
+    newSocket.on("message_deleted", (messageId) => {
+  setMessages((previousMessages) =>
+    previousMessages.filter(
+      (message) => message._id !== messageId
+    )
+  );
+});
+
     // ============================
     // USER TYPING
     // ============================
@@ -151,27 +159,43 @@ function App() {
     setUsername(trimmedUsername);
   };
 
-  // ============================
-  // SEND MESSAGE
-  // ============================
+// ============================
+// SEND MESSAGE
+// ============================
 
-  const handleSendMessage = (message) => {
-    if (!socket) {
-      console.error("Socket is not connected");
-      return;
-    }
+const handleSendMessage = (message) => {
+  if (!socket) {
+    console.error("Socket is not connected");
+    return;
+  }
 
-    const trimmedMessage = message.trim();
+  const trimmedMessage = message.trim();
 
-    if (!trimmedMessage) {
-      return;
-    }
+  if (!trimmedMessage) {
+    return;
+  }
 
-    socket.emit("send_message", {
-      username,
-      message: trimmedMessage,
-    });
-  };
+  socket.emit("send_message", {
+    username,
+    message: trimmedMessage,
+  });
+};
+
+// ============================
+// DELETE MESSAGE
+// ============================
+
+const handleDeleteMessage = (messageId) => {
+  if (!socket) {
+    console.error("Socket is not connected");
+    return;
+  }
+
+  socket.emit("delete_message", {
+    messageId,
+    username,
+  });
+};
 
   // ============================
   // LOGIN SCREEN
@@ -234,9 +258,10 @@ function App() {
           </div>
         ) : (
           <MessageList
-            messages={messages}
-            currentUsername={username}
-          />
+  messages={messages}
+  currentUsername={username}
+  onDelete={handleDeleteMessage}
+/>
         )}
 
         {/* TYPING INDICATOR */}
